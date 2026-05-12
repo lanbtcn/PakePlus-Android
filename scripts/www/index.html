@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="高考化学通 - 专为高三学生打造的高考化学复习PWA应用" />
+  <meta name="theme-color" content="#4DB6AC" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>高考化学通</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192x192.png" />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- 页面内容 -->
+    <main class="page-content" id="pageContent">
+      <!-- 首页 -->
+      <div id="pageHome" class="page">
+        <div class="home-header">
+          <div class="home-greeting">
+            <div class="home-greeting-text" id="greetingText">下午好</div>
+            <div class="home-title">化学冲刺复习</div>
+          </div>
+          <div class="home-streak" id="streakBadge">0天</div>
+        </div>
+
+        <div class="mastery-section">
+          <div class="mastery-ring-wrap">
+            <svg class="mastery-ring" viewBox="0 0 120 120">
+              <circle class="mastery-ring-bg" cx="60" cy="60" r="50" />
+              <circle class="mastery-ring-progress" id="masteryRing" cx="60" cy="60" r="50" stroke-dasharray="314" stroke-dashoffset="314" />
+            </svg>
+            <div class="mastery-ring-text">
+              <div class="mastery-percent" id="masteryPercent">0%</div>
+              <div class="mastery-label">掌握率</div>
+            </div>
+          </div>
+          <div class="mastery-stats">
+            <div class="mastery-stat">
+              <span class="mastery-dot green"></span>
+              <span>已掌握</span>
+              <span class="mastery-stat-num" id="statMastered">0</span>
+            </div>
+            <div class="mastery-stat">
+              <span class="mastery-dot red"></span>
+              <span>待加强</span>
+              <span class="mastery-stat-num" id="statWeak">0</span>
+            </div>
+            <div class="mastery-stat">
+              <span class="mastery-dot blue"></span>
+              <span>未学习</span>
+              <span class="mastery-stat-num" id="statUnlearned">0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="daily-challenge" onclick="app.startDaily()">
+          <div class="daily-challenge-icon">&#9889;</div>
+          <div class="daily-challenge-info">
+            <div class="daily-challenge-title">今日挑战</div>
+            <div class="daily-challenge-sub">每日一练 · 随机10道高频考点真题</div>
+          </div>
+          <div class="daily-challenge-arrow">&#8594;</div>
+        </div>
+
+        <div class="section-title">知识模块</div>
+        <div class="module-list" id="moduleList"></div>
+      </div>
+
+      <!-- 模块页（卡片+刷题tab） -->
+      <div id="pageModule" class="page hidden">
+        <div class="module-topbar">
+          <button class="back-btn" onclick="app.navTo('home')">&#8592;</button>
+          <div class="module-topbar-tag" id="moduleTag">基本概念与计量</div>
+          <div class="module-topbar-progress" id="moduleTopProgress">1/30</div>
+        </div>
+        <div class="module-tabs">
+          <div class="module-tab active" data-tab="cards" onclick="app.switchModuleTab('cards')">知识卡片</div>
+          <div class="module-tab" data-tab="quiz" onclick="app.switchModuleTab('quiz')">模块刷题</div>
+        </div>
+        <div class="module-tab-content" id="moduleTabContent"></div>
+      </div>
+
+      <!-- 刷题页 -->
+      <div id="pageQuiz" class="page hidden">
+        <div class="quiz-topbar">
+          <button class="back-btn" onclick="app.quitQuiz()">&#8592;</button>
+          <div class="quiz-tag" id="quizTag">基本概念与计量</div>
+          <div class="quiz-progress" id="quizProgress">1/30</div>
+        </div>
+        <div class="quiz-body" id="quizBody"></div>
+      </div>
+
+      <!-- 错题本 -->
+      <div id="pageWrong" class="page hidden">
+        <div class="page-header">
+          <div class="page-header-title">错题本</div>
+        </div>
+        <div class="wrong-filter" id="wrongFilter"></div>
+        <div class="wrong-list" id="wrongList"></div>
+        <div class="wrong-empty" id="wrongEmpty">&#128218;<br>暂无错题，继续保持！</div>
+      </div>
+
+      <!-- 我的 -->
+      <div id="pageProfile" class="page hidden">
+        <div class="page-header">
+          <div class="page-header-title">我的</div>
+        </div>
+        <div class="profile-section">
+          <div class="profile-item" onclick="app.resetProgress()">
+            <span class="profile-icon">&#128259;</span>
+            <span class="profile-text">重置学习进度</span>
+            <span class="profile-arrow">&#8594;</span>
+          </div>
+          <div class="profile-item">
+            <span class="profile-icon">&#128218;</span>
+            <span class="profile-text">关于应用</span>
+            <span class="profile-arrow">&#8594;</span>
+          </div>
+        </div>
+        <div class="about-box">
+          <h3>高考化学通</h3>
+          <p>专为高三学生打造的高考化学复习PWA应用</p>
+          <p>内置100道真题风格选择题 + 50张知识卡片</p>
+          <p>覆盖6大核心模块，助你冲刺高考</p>
+        </div>
+      </div>
+
+      <!-- 结果页 -->
+      <div id="pageResult" class="page hidden">
+        <div class="result-box">
+          <div class="result-emoji" id="resultEmoji">&#127881;</div>
+          <div class="result-title" id="resultTitle">练习完成</div>
+          <div class="result-score" id="resultScore">8/10</div>
+          <div class="result-accuracy" id="resultAccuracy">正确率 80%</div>
+          <div class="result-stats" id="resultStats"></div>
+          <div class="result-actions">
+            <button class="btn btn-secondary" onclick="app.navTo('home')">返回首页</button>
+            <button class="btn btn-primary" id="resultRetryBtn" onclick="app.retryWrong()">重做错题</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- 底部导航 -->
+    <nav class="bottom-nav" id="bottomNav">
+      <button class="nav-item active" data-page="home" onclick="app.navTo('home')">
+        <span class="nav-icon">&#127968;</span>
+        <span>首页</span>
+      </button>
+      <button class="nav-item" data-page="wrong" onclick="app.navTo('wrong')">
+        <span class="nav-icon">&#128211;</span>
+        <span>错题本</span>
+        <span class="nav-badge hidden" id="wrongBadge">0</span>
+      </button>
+      <button class="nav-item" data-page="profile" onclick="app.navTo('profile')">
+        <span class="nav-icon">&#128100;</span>
+        <span>我的</span>
+      </button>
+    </nav>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(){});
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      app.init();
+    });
+  </script>
+</body>
+</html>
